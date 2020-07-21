@@ -39,7 +39,7 @@ if(config.env == 'prod'){
     let bmpData = await readBmp180();
     let dhtData = await readDht22();
     let sensorData = {
-      timestamp : moment().format("YYYY-MM-DD hh:mm:ss"),
+      timestamp : moment().format("YYYY-MM-DD HH:mm:ss"),
       temperature1 : bmpData.temperature,
       temperature2 : dhtData.temperature,
       humidity : dhtData.humidity,
@@ -57,7 +57,7 @@ if(config.env == 'prod'){
 
   getAndStoreSensorData = async function() {
     let sensorData = {
-      timestamp : moment().format("YYYY-MM-DD hh:mm:ss"),
+      timestamp : moment().format("YYYY-MM-DD HH:mm:ss"),
       temperature1 : -1,
       temperature2 : -1,
       humidity : -1,
