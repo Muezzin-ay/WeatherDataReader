@@ -1,9 +1,9 @@
 const bmp180 = require('bmp180-sensor');
 const sensor = require("node-dht-sensor");
 const moment = require('moment');
-const db = require('./dbController/dbcontroller');
+const db = require('./modules/dbcontroller');
 
-const { writeToDB } = require('./dbController/dbcontroller');
+const { writeToDB } = require('./modules/dbcontroller');
 
 async function readBmp180() {
   return new Promise (resolve => {
