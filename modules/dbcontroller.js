@@ -1,7 +1,9 @@
 const mariadb = require('mariadb');
 const moment = require('moment');
+const config = require('./readConfig')().init();
 
-const pool = mariadb.createPool({host: '192.168.5.35', user: 'writeOnly', connectionLimit: 5, password:'trcsica3'});
+
+const pool = mariadb.createPool({host: config.dbHost, user: config.dbUser, connectionLimit: 5, password: config.dbPassword});
 
 module.exports = {
   writeToDB: function(sensorData){
