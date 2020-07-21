@@ -1,54 +1,79 @@
-const bmp180 = require('bmp180-sensor');
-const sensor = require("node-dht-sensor");
+
+
 const moment = require('moment');
 const db = require('./modules/dbcontroller');
+const config = require('./modules/readConfig')().init();
 
-const { writeToDB } = require('./modules/dbcontroller');
+let getAndStoreSensorData = null;
 
-async function readBmp180() {
-  return new Promise (resolve => {
-    const sbmp = await bmp180({
-      address: 0x77,
-      mode: 1,
-  })
+if(config.env == 'prod'){
+  const bmp180 = require('bmp180-sensor');
+  async function readBmp180() {
+    return new Promise (async resolve => {
+      const sbmp = await bmp180({
+        address: 0x77,
+        mode: 1,
+    })
 
-  const data = await sbmp.read()
-  sensorData = data;
+    const data = await sbmp.read()
+    sensorData = data;
 
-  await sbmp.close()
-  resolve ({pressure : data.pressure, temperature : data.temperature})
-  }) 
-}
-
-async function readDht22() {
-  return new Promise(resolve => {
-    sensor.read(22, 4, function(err, temperature, humidity) {
-      if (!err) {
-        resolve ({humidity : humidity, temperature : temperature})
-      }
-    });
-  })
-  
-}
-
-async function getAndStoreSensorData () {
-  let bmpData = await readBmp180();
-  let dhtData = await readDht22();
-  let sensorData = {
-    timestamp : moment().format("YYYY-MM-DD hh:mm:ss"),
-    temperature1 : bmpData.temperature,
-    temperature2 : dhtData.temperature,
-    humidity : dhtData.humidity,
-    pressure : bmpData.pressure
+    await sbmp.close()
+    resolve ({pressure : data.pressure, temperature : data.temperature})
+    }) 
   }
-  console.log(sensorData)
-  writeToDB(sensorData)
+
+  const dht22 = require("node-dht-sensor");
+  async function readDht22() {
+    return new Promise(async resolve => {
+      dht22.read(22, 4, function(err, temperature, humidity) {
+        if (!err) {
+          resolve ({humidity : humidity, temperature : temperature})
+        }
+      });
+    })
+    
+  }
+
+  getAndStoreSensorData = async function() {
+    let bmpData = await readBmp180();
+    let dhtData = await readDht22();
+    let sensorData = {
+      timestamp : moment().format("YYYY-MM-DD hh:mm:ss"),
+      temperature1 : bmpData.temperature,
+      temperature2 : dhtData.temperature,
+      humidity : dhtData.humidity,
+      pressure : bmpData.pressure
+    }
+    console.log(sensorData)
+    db.writeToDB(sensorData)
+  }
+
+  
+}else{
+
+  console.log('Start application in DEV mode.');
+
+
+  getAndStoreSensorData = async function() {
+    let sensorData = {
+      timestamp : moment().format("YYYY-MM-DD hh:mm:ss"),
+      temperature1 : -1,
+      temperature2 : -1,
+      humidity : -1,
+      pressure : -1
+    }
+    console.log(sensorData)
+    db.writeToDB(sensorData)
+  }
 }
 
 getAndStoreSensorData ()
 setInterval(()=>{
-  getAndStoreSensorData ()
+getAndStoreSensorData ()
 },10000);
+
+
 
 
 
