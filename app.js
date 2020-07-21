@@ -53,7 +53,7 @@ if(config.env == 'prod'){
 }else{
 
   console.log('Start application in DEV mode.');
-
+  console.log('Interval: ' + config.sensorInterval/1000 + ' seconds.');
 
   getAndStoreSensorData = async function() {
     let sensorData = {
@@ -71,7 +71,7 @@ if(config.env == 'prod'){
 getAndStoreSensorData ()
 setInterval(()=>{
 getAndStoreSensorData ()
-},10000);
+},config.sensorInterval);
 
 
 
